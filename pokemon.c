@@ -1,6 +1,7 @@
 #include <string.h>
 #include "pokemon.h"
 #define TYPES_COUNT 342
+
 void initializeTypes(Type types[])
 {
     FILE *file = fopen("types.txt", "r");
@@ -41,15 +42,16 @@ void initializeTypes(Type types[])
 // untested method
 void initializeMoves(Move moves[], Type types[])
 {
-    initializeTypes(types);
+
     FILE *file = fopen("moves.txt", "r");
     char line[100];
     while (fgets(line, sizeof(line), file))
     {
         char typeName[20];
+        char categoryName[20];
 
         int movesIndex = 0;
-        sscanf(line, "%s %s %s %f", moves[movesIndex].name, typeName, moves[movesIndex].category, moves[movesIndex].power);
+        sscanf(line, "%s %s %s %f", moves[movesIndex].name, typeName, categoryName, moves[movesIndex].power);
         // assign the type corresponding to the move according to the type name
 
         int iterator = 0;
@@ -70,8 +72,27 @@ void initializeMoves(Move moves[], Type types[])
             printf("Type not found for move: %s\n", moves[movesIndex].name);
             exit(1);
         }
+
+        // convert categoryName to Category enum
+        if (strcmp(categoryName, "Physical") == 0)
+        {
+            moves[movesIndex].category = Physical;
+        }
+        else
+        {
+            moves[movesIndex].category = Special;
+        }
+
         movesIndex++;
     }
 
     fclose(file);
+}
+void initializePokemons(Pokemon pokemons[], Type types[], Move moves[])
+{
+    // assuming moves and types are already initialized
+
+    FILE *file = fopen("pokemons.txt", "r");
+    char line[100];
+    int pokemonIndex = 0;
 }
