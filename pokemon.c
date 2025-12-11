@@ -88,11 +88,11 @@ void initializeMoves(Move moves[], Type types[])
 
     fclose(file);
 }
-void initializePokemons(Pokemon pokemons[], Type types[], Move moves[])
+/*void initializePokemons(Pokemon pokemons[], Type types[], Move moves[])
 {
     // assuming moves and types are already initialized
 
     FILE *file = fopen("pokemons.txt", "r");
     char line[100];
     int pokemonIndex = 0;
-}
+}*/
