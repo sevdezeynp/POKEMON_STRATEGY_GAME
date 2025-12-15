@@ -2,6 +2,7 @@
 #define TYPES_COUNT 19 //none type added to types.txt
 #define MOVES_COUNT 486
 #define POKEMONS_COUNT 1015
+#define PLAYER_POKEMONS_COUNT 6
 #include <stdio.h>
 
 

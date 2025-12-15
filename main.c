@@ -1,14 +1,17 @@
-
+#include <stdlib.h>
 #include "pokemon.h"
 
 int main()
 {
 
-    Type Types[TYPES_COUNT];
-    Move Moves[MOVES_COUNT];
-    Pokemon Pokemons[POKEMONS_COUNT];
+    Type *types = malloc(sizeof(Type) * TYPES_COUNT);
+
+    Move *moves = malloc(sizeof(Move) * MOVES_COUNT);
+
+    Pokemon *pokemons = malloc(sizeof(Pokemon) * POKEMONS_COUNT);
+
     Player Player1;
     Player Player2;
 
-    initialize(Types, Moves, Pokemons, &Player1, &Player2);
+    initialize(types, moves, pokemons, &Player1, &Player2);
 }

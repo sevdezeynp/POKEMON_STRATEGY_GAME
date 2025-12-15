@@ -159,9 +159,8 @@ void initializePokemons(Type types[], Move moves[], Pokemon pokemons[])
     Charmander Fire - 39 52 43 60 50 65
 
     */
-        srand(time(NULL));
+    srand(time(NULL));
 
-        
     FILE *file = fopen("Texts/pokemon.txt", "r");
     if (file == NULL)
     {
@@ -281,4 +280,61 @@ void initializePokemons(Type types[], Move moves[], Pokemon pokemons[])
     }
 
     fclose(file);
+}
+
+void initialize(Type types[], Move moves[], Pokemon pokemons[], Player *player1, Player *player2)
+{
+    srand(time(NULL));
+
+    initializeTypes(types);
+    initializeMoves(moves, types);
+    initializePokemons(types, moves, pokemons);
+
+    strcpy(player1->name, "Sunflower");
+    strcpy(player2->name, "Jasmine");
+    player1->currentIndex = 1;
+    player2->currentIndex = 1;
+
+    // assign six pokemon randomly to player 1
+    int selectedPokemonIndicies[PLAYER_POKEMONS_COUNT];
+    int isDuplicate;
+    for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+    {
+        int pokemonIndex;
+        do
+        {
+            isDuplicate = 0;
+
+            pokemonIndex = rand() % POKEMONS_COUNT;
+            for (int j = 0; j < i; j++)
+            {
+                if (selectedPokemonIndicies[j] == pokemonIndex)
+                {
+                    isDuplicate = 1;
+                }
+            }
+        } while (isDuplicate);
+        selectedPokemonIndicies[i] = pokemonIndex;
+        player1->pokemons[i] = pokemons[pokemonIndex];
+    }
+
+    for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+    {
+        int pokemonIndex;
+        do
+        {
+            isDuplicate = 0;
+
+            pokemonIndex = rand() % POKEMONS_COUNT;
+            for (int j = 0; j < i; j++)
+            {
+                if (selectedPokemonIndicies[j] == pokemonIndex)
+                {
+                    isDuplicate = 1;
+                }
+            }
+        } while (isDuplicate);
+        selectedPokemonIndicies[i] = pokemonIndex;
+        player2->pokemons[i] = pokemons[pokemonIndex];
+    }
 }
