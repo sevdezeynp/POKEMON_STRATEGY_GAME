@@ -1,3 +1,4 @@
+#define TYPES_EFFECT_COUNT 18
 #define TYPES_COUNT 18
 #define MOVES_COUNT 486
 #define POKEMONS_COUNT 1015
@@ -13,8 +14,7 @@ typedef struct {
 
 typedef struct {
     char name[20];
-    TypeEffect typeEffect[18];
-
+    TypeEffect typeEffect[TYPES_EFFECT_COUNT];
 }Type;
 
 typedef enum{
@@ -57,5 +57,5 @@ void initialize(Type types[],Move moves[], Pokemon pokemons[],Player *player1,Pl
 
 //game function prototypes
 void game(Player * player1, Player * player2);
-void round ( Player * player1, Player * player2);
+void game_round ( Player * player1, Player * player2);
 void applyDamage(Player * attacker, Player defender, int attackerMoveIndex, int defenderMoveIndex, int attackerAction, int defenderAction);

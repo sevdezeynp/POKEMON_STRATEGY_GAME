@@ -1,17 +1,33 @@
 #include <string.h>
+#include <stdlib.h>
 #include "pokemon.h"
-#define TYPES_COUNT 342
 
 void initializeTypes(Type types[])
 {
     FILE *file = fopen("types.txt", "r");
+    if (file == NULL)
+    {
+        printf("Error opening types.txt file\n");
+        exit(1);
+    }
     char line[100];
     int typeIndex = 0;
     int effectIndex = 0;
     char currentAttacker[20];
     while (fgets(line, sizeof(line), file))
     {
+        //printf("DEBUG: Read line: [%s]\n", line);
         // why do I need to remove the \n char?
+        //because it changes the string comparison results
+        //example result I get without removing \n
+        /*DEBUG: Read line: [Ice 2
+        ]*/
+
+        int len = strlen(line);
+        if(len >0 && line[len-1]=='\n'){
+            line [len-1] = '\0';
+        }
+       
         char defenderName[20];
         float multiplier;
         // sscanf reads formatted input from a string and returns the number of items successfully read
@@ -31,13 +47,12 @@ void initializeTypes(Type types[])
         }
         else
         {                                  // if the multiplier is not found then it is an attack name
-            strcpy(currentAttacker, line); // dest , source
+            strcpy(currentAttacker, line); // dest , source //current attacker is the name of type
             strcpy(types[typeIndex].name, currentAttacker);
             // remove newline character from the name
         }
-
-        fclose(file);
     }
+    fclose(file);
 }
 // untested method
 void initializeMoves(Move moves[], Type types[])
