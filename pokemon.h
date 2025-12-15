@@ -1,5 +1,5 @@
 #define TYPES_EFFECT_COUNT 18
-#define TYPES_COUNT 18
+#define TYPES_COUNT 19 //none type added to types.txt
 #define MOVES_COUNT 486
 #define POKEMONS_COUNT 1015
 #include <stdio.h>
@@ -51,7 +51,7 @@ typedef struct{
 //initialize function protoytpe
 void initializeTypes(Type types[]);
 void initializeMoves(Move moves[], Type types[]);
-void initializePokemons(Pokemon pokemons[], Type types[], Move moves[]);
+void initializePokemons(Type types[], Move moves[],Pokemon pokemons[]);
 
 void initialize(Type types[],Move moves[], Pokemon pokemons[],Player *player1,Player *player2);
 
@@ -59,3 +59,4 @@ void initialize(Type types[],Move moves[], Pokemon pokemons[],Player *player1,Pl
 void game(Player * player1, Player * player2);
 void game_round ( Player * player1, Player * player2);
 void applyDamage(Player * attacker, Player defender, int attackerMoveIndex, int defenderMoveIndex, int attackerAction, int defenderAction);
+
