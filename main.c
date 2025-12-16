@@ -14,4 +14,6 @@ int main()
     Player Player2;
 
     initialize(types, moves, pokemons, &Player1, &Player2);
+
+    game(&Player1, &Player2);
 }

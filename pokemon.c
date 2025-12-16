@@ -338,3 +338,209 @@ void initialize(Type types[], Move moves[], Pokemon pokemons[], Player *player1,
         player2->pokemons[i] = pokemons[pokemonIndex];
     }
 }
+// helper function
+int isAlive(Player *player)
+{
+    for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+    {
+        if (player->pokemons[i].currentHP > 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+void game(Player *player1, Player *player2)
+{
+    printf("====================================================\n");
+    printf("==========Welcome-To-Pokemon-Strategy-Game==========\n");
+    printf("====================================================\n");
+    printf("Player1 name: %s\n", player1->name);
+    printf("Player2 name: %s\n", player2->name);
+
+    // The game end when one of the players has no Pokemon with currentHP value greater than 0
+    int isOneAlive;
+    int isTwoAlive;
+    do
+    {
+        game_round(player1, player2);
+        isOneAlive = isAlive(player1);
+
+        isTwoAlive = isAlive(player2);
+
+    } while (isOneAlive && isTwoAlive);
+}
+
+void game_round(Player *player1, Player *player2)
+{
+    printf("1->%s->> Choose an action to perform:\n", player1->name);
+    printf("1 - Attack\n");
+    printf("2 - Change Pokemon\n");
+    int p1_action;
+    scanf("%d", &p1_action);
+
+    printf("====================================================\n");
+    printf("2->%s->> Choose an action to perform,\n", player2->name);
+    printf("1 - Attack\n");
+    printf("2 - Change Pokemon\n");
+    int p2_action;
+    scanf("%d", &p2_action);
+
+    if (p1_action == 2) // handle switches first
+    {
+        // player1 choose change pokemon option, show available pokemons
+        for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+        {
+            if (player1->pokemons[i].currentHP <= 0)
+            {
+                continue;
+            }
+            printf("\n--- Pokemon #%d ---\n", i + 1);
+            printf("Name: %s, HP: %d \n", player1->pokemons[i].name, player1->pokemons[i].currentHP);
+        }
+        printf("Choose one pokemon index: \n");
+        int newPokemonIndex;
+        scanf("%d", &newPokemonIndex);
+        player1->currentIndex = newPokemonIndex;
+        printf("The current pokemon index for player %s is updated to %d\n", player1->name, player1->currentIndex);
+    }
+    if (p2_action == 2) // handle switches first
+    {
+        // player2 choose change pokemon option, show available pokemons
+        for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+        {
+            if (player2->pokemons[i].currentHP <= 0)
+            {
+                continue;
+            }
+            printf("\n--- Pokemon #%d ---\n", i + 1);
+            printf("Name: %s, HP: %d \n", player2->pokemons[i].name, player2->pokemons[i].currentHP);
+        }
+        printf("Choose one pokemon index: \n");
+        int newPokemonIndex;
+        scanf("%d", &newPokemonIndex);
+        player2->currentIndex = newPokemonIndex;
+        printf("The current pokemon index for player %s is updated to %d\n", player2->name, player2->currentIndex);
+    }
+    if (p1_action == 1)
+    {
+        // player1 choose attack, show moves of the current pokemon
+        printf("1->%s->> Select one of the moves of the current pokemon %s:\n", player1->name, player1->pokemons[player1->currentIndex].name);
+        for (int j = 0; j < 4; j++)
+        {
+            printf("  %d. %-20s [%s] Power: %.0f\n",
+                   j + 1,
+                   player1->pokemons[player1->currentIndex].moves[j].name,
+                   player1->pokemons[player1->currentIndex].moves[j].type.name,
+                   player1->pokemons[player1->currentIndex].moves[j].power);
+        }
+        int p1_selectedMoveIndex;
+        scanf("%d", &p1_selectedMoveIndex);
+        if (p1_selectedMoveIndex > 4 || p1_selectedMoveIndex < 1)
+        {
+            printf("invalid move selection for %d\n", p1_selectedMoveIndex);
+            // I should do something to skip the rest of the round or re ask for a correct input
+        }
+
+        // apply damage
+        // I LEFT HERE 16-12-2025 16:00PM
+    }
+
+    else
+    {
+        printf("invalid input provided: %d", p1_action);
+    }
+}
+
+void applyDamage(Player *attacker, Player *defender, int attackerMoveIndex)
+{
+    /*
+        damage = power of the move *
+        physical or special attack according to the pokemon *
+        type effect1*
+        type effect2 *
+        same type attack bonus (which is 1.5 if attack move type matches with one of types of attacker Pokemon, and is 1 otherwise)
+         / physical or special defense
+       */
+
+    Pokemon *attacker_pokemon = &attacker->pokemons[attacker->currentIndex];
+    Pokemon *defender_pokemon = &defender->pokemons[defender->currentIndex];
+
+    float powerOfMove = attacker_pokemon->moves[attackerMoveIndex].power;
+
+    int attack;
+    int defense;
+    if (attacker_pokemon->moves[attackerMoveIndex].category == 0)
+    {
+        // then it is Physical category
+        attack = attacker_pokemon->attack;
+        defense = defender_pokemon->defense;
+    }
+    else
+    {
+        attack = attacker_pokemon->spAtk;
+        defense = defender_pokemon->spDef;
+    }
+
+    float typeEffect1;
+    float typeEffect2;
+    // find the multiplier of corresponding typeEffect.
+    int type1Found = 0;
+
+    for (int i = 0; i < TYPES_EFFECT_COUNT; i++)
+    {
+        if (strcmp(defender_pokemon->types[0].name, attacker_pokemon->moves[attackerMoveIndex].type.typeEffect[i].defName) == 0)
+        {
+            typeEffect1 = attacker_pokemon->types[0].typeEffect[i].multiplier;
+            type1Found = 1;
+        }
+    }
+    if (!type1Found)
+    {
+        printf("type 1 multiplier is not found for defender type name:%s", defender_pokemon->types[0].name);
+    }
+
+    // for type Effect 2 check for none type
+    if (strcmp(attacker_pokemon->types[1].name, "None") == 0)
+    {
+        typeEffect2 = 1;
+    }
+    else
+    {
+        int type2Found = 0;
+        for (int i = 0; i < TYPES_EFFECT_COUNT; i++)
+        {
+            if (strcmp(defender_pokemon->types[1].name, attacker_pokemon->moves[attackerMoveIndex].type.typeEffect[i].defName) == 0)
+            {
+                typeEffect2 = attacker_pokemon->types[1].typeEffect[i].multiplier;
+                type2Found = 1;
+            }
+        }
+        if (!type2Found)
+        {
+            printf("type 2 multiplier is not found for defender type name:%s", defender_pokemon->types[1].name);
+        }
+    }
+
+    // check for same attack type bonus
+    // if attack move type = attacker->pokemons[attacker->currentIndex].moves[attackerMoveIndex].type.name
+    // attacker's pokemon type1 or type2
+
+    float STAB = 1;
+
+    if (strcmp(attacker_pokemon->moves[attackerMoveIndex].type.name, attacker_pokemon->types[0].name) == 0 || strcmp(attacker_pokemon->moves[attackerMoveIndex].type.name, attacker_pokemon->types[1].name) == 0)
+    {
+
+        STAB = 1.5;
+    }
+
+    float damage = powerOfMove * attack * typeEffect1 * typeEffect2 * STAB / defense;
+
+    // decrease defender's pokemon's HP
+    defender->pokemons[defender->currentIndex].currentHP -= (int)damage;
+    printf("%s used %s! Dealt %d damage to %s.\n",
+           attacker_pokemon->name, attacker_pokemon->moves[attackerMoveIndex].name, (int)damage, defender_pokemon->name);
+
+    // change the current pokemon for defender if the pokemon faints
+}

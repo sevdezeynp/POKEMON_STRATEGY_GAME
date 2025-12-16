@@ -59,5 +59,7 @@ void initialize(Type types[],Move moves[], Pokemon pokemons[],Player *player1,Pl
 //game function prototypes
 void game(Player * player1, Player * player2);
 void game_round ( Player * player1, Player * player2);
-void applyDamage(Player * attacker, Player defender, int attackerMoveIndex, int defenderMoveIndex, int attackerAction, int defenderAction);
+void applyDamage(Player * attacker, Player * defender, int attackerMoveIndex, int defenderMoveIndex, int attackerAction, int defenderAction);
 
+//helper function
+int isAlive(Player *player);
