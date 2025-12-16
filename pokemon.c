@@ -292,8 +292,8 @@ void initialize(Type types[], Move moves[], Pokemon pokemons[], Player *player1,
 
     strcpy(player1->name, "Sunflower");
     strcpy(player2->name, "Jasmine");
-    player1->currentIndex = 1;
-    player2->currentIndex = 1;
+    player1->currentIndex = 0; // initialize index to zero to include the first pokemon
+    player2->currentIndex = 0;
 
     // assign six pokemon randomly to player 1
     int selectedPokemonIndicies[PLAYER_POKEMONS_COUNT];
@@ -378,13 +378,17 @@ void game_round(Player *player1, Player *player2)
     printf("1 - Attack\n");
     printf("2 - Change Pokemon\n");
     int p1_action;
+    int p1_selectedMoveIndex;
+    int p2_action;
+    int p2_selectedMoveIndex;
+    // I have to decrease indicies by one to not face IndexOutOfBounds Error
     scanf("%d", &p1_action);
 
     printf("====================================================\n");
     printf("2->%s->> Choose an action to perform,\n", player2->name);
     printf("1 - Attack\n");
     printf("2 - Change Pokemon\n");
-    int p2_action;
+
     scanf("%d", &p2_action);
 
     if (p1_action == 2) // handle switches first
@@ -399,10 +403,15 @@ void game_round(Player *player1, Player *player2)
             printf("\n--- Pokemon #%d ---\n", i + 1);
             printf("Name: %s, HP: %d \n", player1->pokemons[i].name, player1->pokemons[i].currentHP);
         }
-        printf("Choose one pokemon index: \n");
+        printf("1->%s->> Choose one pokemon index: \n", player1->name);
         int newPokemonIndex;
         scanf("%d", &newPokemonIndex);
-        player1->currentIndex = newPokemonIndex;
+        if (newPokemonIndex < 1 || newPokemonIndex > 6)
+        {
+            printf("Invalid Pokemon selection!\n");
+            // do something, ask again or return an error
+        }
+        player1->currentIndex = --newPokemonIndex; // decrease index by one
         printf("The current pokemon index for player %s is updated to %d\n", player1->name, player1->currentIndex);
     }
     if (p2_action == 2) // handle switches first
@@ -417,10 +426,10 @@ void game_round(Player *player1, Player *player2)
             printf("\n--- Pokemon #%d ---\n", i + 1);
             printf("Name: %s, HP: %d \n", player2->pokemons[i].name, player2->pokemons[i].currentHP);
         }
-        printf("Choose one pokemon index: \n");
+        printf("2->%s->> Choose one pokemon index: \n", player2->name);
         int newPokemonIndex;
         scanf("%d", &newPokemonIndex);
-        player2->currentIndex = newPokemonIndex;
+        player2->currentIndex = --newPokemonIndex;
         printf("The current pokemon index for player %s is updated to %d\n", player2->name, player2->currentIndex);
     }
     if (p1_action == 1)
@@ -435,21 +444,114 @@ void game_round(Player *player1, Player *player2)
                    player1->pokemons[player1->currentIndex].moves[j].type.name,
                    player1->pokemons[player1->currentIndex].moves[j].power);
         }
-        int p1_selectedMoveIndex;
+
         scanf("%d", &p1_selectedMoveIndex);
+
         if (p1_selectedMoveIndex > 4 || p1_selectedMoveIndex < 1)
         {
             printf("invalid move selection for %d\n", p1_selectedMoveIndex);
             // I should do something to skip the rest of the round or re ask for a correct input
         }
+        --p1_selectedMoveIndex;
+    }
+    if (p2_action == 1)
+    {
+        // player2 choose attack, show moves of the current pokemon
+        printf("2->%s->> Select one of the moves of the current pokemon %s:\n", player2->name, player2->pokemons[player2->currentIndex].name);
+        for (int j = 0; j < 4; j++)
+        {
+            printf("  %d. %-20s [%s] Power: %.0f\n",
+                   j + 1,
+                   player2->pokemons[player2->currentIndex].moves[j].name,
+                   player2->pokemons[player2->currentIndex].moves[j].type.name,
+                   player2->pokemons[player2->currentIndex].moves[j].power);
+        }
 
-        // apply damage
-        // I LEFT HERE 16-12-2025 16:00PM
+        scanf("%d", &p2_selectedMoveIndex);
+
+        if (p2_selectedMoveIndex > 4 || p2_selectedMoveIndex < 1)
+        {
+            printf("invalid move selection for %d\n", p2_selectedMoveIndex);
+            // I should do something to skip the rest of the round or re ask for a correct input
+        }
+        --p2_selectedMoveIndex;
     }
 
-    else
+    // after taking all user entries let's do the attack!
+    // in case they both decided to attack
+    if (p1_action == 1 && p2_action == 1)
     {
-        printf("invalid input provided: %d", p1_action);
+        /*first damage will be given by faster Pokemon,if defender
+        faints after taking damage it will not be able to attack, so
+        other Pokemon will take no damage*/
+
+        Player *faster = player1->pokemons[player1->currentIndex].speed >= player2->pokemons[player2->currentIndex].speed ? player1 : player2;
+        Player *slower = player1->pokemons[player1->currentIndex].speed > player2->pokemons[player2->currentIndex].speed ? player2 : player1;
+        int fasterMoveIndex = player1->pokemons[player1->currentIndex].speed >= player2->pokemons[player2->currentIndex].speed ? p1_selectedMoveIndex : p2_selectedMoveIndex;
+        int slowerMoveIndex = player1->pokemons[player1->currentIndex].speed > player2->pokemons[player2->currentIndex].speed ? p2_selectedMoveIndex : p1_selectedMoveIndex;
+        applyDamage(faster, slower, fasterMoveIndex);
+        // change the current pokemon for defender if the pokemon
+        if (slower->pokemons[slower->currentIndex].currentHP <= 0)
+        {
+            for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+            {
+                if (slower->pokemons[i].currentHP > 0)
+                {
+                    slower->currentIndex = i;
+                    break;
+                }
+            }
+            printf("%s pokemon's faints!, Switched to the pokemon named %s\n", slower->name, slower->pokemons[slower->currentIndex].name);
+            printf("Faster pokemon of %s has no damage\n", faster->name);
+        }
+        else
+        {
+            applyDamage(slower, faster, slowerMoveIndex);
+            if (faster->pokemons[faster->currentIndex].currentHP <= 0)
+            {
+                for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+                {
+                    if (faster->pokemons[i].currentHP > 0)
+                    {
+                        faster->currentIndex = i;
+                        break;
+                    }
+                }
+                printf("%s pokemon's faints!, Switched to the pokemon named %s\n", faster->name, faster->pokemons[faster->currentIndex].name);
+            }
+        }
+    }
+    else if (p1_action == 1)
+    {
+        applyDamage(player1, player2, p1_selectedMoveIndex);
+        if (player2->pokemons[player2->currentIndex].currentHP <= 0)
+        {
+            for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+            {
+                if (player2->pokemons[i].currentHP > 0)
+                {
+                    player2->currentIndex = i;
+                    break;
+                }
+            }
+            printf("%s pokemon's faints!, Switched to the pokemon named %s\n", player2->name, player2->pokemons[player2->currentIndex].name);
+        }
+    }
+    else if (p2_action == 1)
+    {
+        applyDamage(player2, player1, p2_selectedMoveIndex);
+        if (player1->pokemons[player1->currentIndex].currentHP <= 0)
+        {
+            for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+            {
+                if (player1->pokemons[i].currentHP > 0)
+                {
+                    player1->currentIndex = i;
+                    break;
+                }
+            }
+            printf("%s pokemon's faints!, Switched to the pokemon named %s\n", player1->name, player1->pokemons[player1->currentIndex].name);
+        }
     }
 }
 
@@ -483,8 +585,8 @@ void applyDamage(Player *attacker, Player *defender, int attackerMoveIndex)
         defense = defender_pokemon->spDef;
     }
 
-    float typeEffect1;
-    float typeEffect2;
+    float typeEffect1 = 1;
+    float typeEffect2 = 1;
     // find the multiplier of corresponding typeEffect.
     int type1Found = 0;
 
@@ -492,7 +594,8 @@ void applyDamage(Player *attacker, Player *defender, int attackerMoveIndex)
     {
         if (strcmp(defender_pokemon->types[0].name, attacker_pokemon->moves[attackerMoveIndex].type.typeEffect[i].defName) == 0)
         {
-            typeEffect1 = attacker_pokemon->types[0].typeEffect[i].multiplier;
+            // You must access the move's type
+            typeEffect1 = attacker_pokemon->moves[attackerMoveIndex].type.typeEffect[i].multiplier;
             type1Found = 1;
         }
     }
@@ -502,7 +605,7 @@ void applyDamage(Player *attacker, Player *defender, int attackerMoveIndex)
     }
 
     // for type Effect 2 check for none type
-    if (strcmp(attacker_pokemon->types[1].name, "None") == 0)
+    if (strcmp(defender_pokemon->types[1].name, "None") == 0)
     {
         typeEffect2 = 1;
     }
@@ -513,7 +616,8 @@ void applyDamage(Player *attacker, Player *defender, int attackerMoveIndex)
         {
             if (strcmp(defender_pokemon->types[1].name, attacker_pokemon->moves[attackerMoveIndex].type.typeEffect[i].defName) == 0)
             {
-                typeEffect2 = attacker_pokemon->types[1].typeEffect[i].multiplier;
+
+                typeEffect2 = attacker_pokemon->moves[attackerMoveIndex].type.typeEffect[i].multiplier;
                 type2Found = 1;
             }
         }
@@ -541,6 +645,4 @@ void applyDamage(Player *attacker, Player *defender, int attackerMoveIndex)
     defender->pokemons[defender->currentIndex].currentHP -= (int)damage;
     printf("%s used %s! Dealt %d damage to %s.\n",
            attacker_pokemon->name, attacker_pokemon->moves[attackerMoveIndex].name, (int)damage, defender_pokemon->name);
-
-    // change the current pokemon for defender if the pokemon faints
 }

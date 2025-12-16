@@ -16,4 +16,16 @@ int main()
     initialize(types, moves, pokemons, &Player1, &Player2);
 
     game(&Player1, &Player2);
+
+    free(types);
+    free(moves);
+    free(pokemons);
+    if (isAlive(&Player1))
+    {
+        printf("Congratulations! <<%s>> won the game, sorry for %s", Player1.name, Player2.name);
+    }
+    else
+    {
+        printf("Congratulations! <<%s>> won the game, sorry for %s", Player2.name, Player1.name);
+    }
 }

@@ -1,35 +1,39 @@
 #define TYPES_EFFECT_COUNT 18
-#define TYPES_COUNT 19 //none type added to types.txt
+#define TYPES_COUNT 19 // none type added to types.txt
 #define MOVES_COUNT 486
 #define POKEMONS_COUNT 1015
 #define PLAYER_POKEMONS_COUNT 6
 #include <stdio.h>
 
-
-
-typedef struct {
+typedef struct
+{
     char atkName[20];
     char defName[20];
     float multiplier;
-}TypeEffect;
+} TypeEffect;
 
-typedef struct {
+typedef struct
+{
     char name[20];
     TypeEffect typeEffect[TYPES_EFFECT_COUNT];
-}Type;
+} Type;
 
-typedef enum{
-Physical, Special
-}Category;
+typedef enum
+{
+    Physical,
+    Special
+} Category;
 
-typedef struct{
+typedef struct
+{
     char name[30];
     Type type;
     Category category;
     float power;
-}Move;
+} Move;
 
-typedef struct {
+typedef struct
+{
 
     char name[30];
     Type types[2];
@@ -41,25 +45,25 @@ typedef struct {
     int spDef;
     int speed;
     Move moves[4];
-}Pokemon;
+} Pokemon;
 
-typedef struct{
+typedef struct
+{
     char name[30];
     Pokemon pokemons[6];
     int currentIndex;
-}Player;
+} Player;
 
-//initialize function protoytpe
+// initialize function protoytpe
 void initializeTypes(Type types[]);
 void initializeMoves(Move moves[], Type types[]);
-void initializePokemons(Type types[], Move moves[],Pokemon pokemons[]);
+void initializePokemons(Type types[], Move moves[], Pokemon pokemons[]);
 
-void initialize(Type types[],Move moves[], Pokemon pokemons[],Player *player1,Player *player2);
+void initialize(Type types[], Move moves[], Pokemon pokemons[], Player *player1, Player *player2);
 
-//game function prototypes
-void game(Player * player1, Player * player2);
-void game_round ( Player * player1, Player * player2);
-void applyDamage(Player * attacker, Player * defender, int attackerMoveIndex, int defenderMoveIndex, int attackerAction, int defenderAction);
-
-//helper function
+// game function prototypes
+void game(Player *player1, Player *player2);
+void game_round(Player *player1, Player *player2);
+void applyDamage(Player *attacker, Player *defender, int attackerMoveIndex);
+// helper function
 int isAlive(Player *player);
