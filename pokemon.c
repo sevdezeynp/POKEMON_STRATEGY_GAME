@@ -378,102 +378,137 @@ void game_round(Player *player1, Player *player2)
     printf("1 - Attack\n");
     printf("2 - Change Pokemon\n");
     int p1_action;
-    int p1_selectedMoveIndex;
+    int p1_selectedMoveIndex = 0;
     int p2_action;
-    int p2_selectedMoveIndex;
+    int p2_selectedMoveIndex = 0;
     // I have to decrease indicies by one to not face IndexOutOfBounds Error
     scanf("%d", &p1_action);
-
+    // if the user doesn't choose 1 or 2
+    if (p1_action != 1 && p1_action != 2)
+    {
+        printf("you can enter only 1 or 2 --->> so your turn is passed :(\n");
+    }
     printf("====================================================\n");
     printf("2->%s->> Choose an action to perform,\n", player2->name);
     printf("1 - Attack\n");
     printf("2 - Change Pokemon\n");
 
     scanf("%d", &p2_action);
+    if (p2_action != 1 && p2_action != 2)
+    {
+        printf("you can enter only 1 or 2 --->> so your turn is passed :(");
+    }
 
     if (p1_action == 2) // handle switches first
     {
-        // player1 choose change pokemon option, show available pokemons
-        for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
-        {
-            if (player1->pokemons[i].currentHP <= 0)
-            {
-                continue;
-            }
-            printf("\n--- Pokemon #%d ---\n", i + 1);
-            printf("Name: %s, HP: %d \n", player1->pokemons[i].name, player1->pokemons[i].currentHP);
-        }
-        printf("1->%s->> Choose one pokemon index: \n", player1->name);
         int newPokemonIndex;
-        scanf("%d", &newPokemonIndex);
-        if (newPokemonIndex < 1 || newPokemonIndex > 6)
+        do
         {
-            printf("Invalid Pokemon selection!\n");
-            // do something, ask again or return an error
-        }
-        player1->currentIndex = --newPokemonIndex; // decrease index by one
-        printf("The current pokemon index for player %s is updated to %d\n", player1->name, player1->currentIndex);
+            // player1 choose change pokemon option, show available pokemons
+            for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+            {
+                if (player1->pokemons[i].currentHP <= 0)
+                {
+                    continue;
+                }
+                printf("\n--- Pokemon #%d ---\n", i + 1);
+                printf("Name: %s, HP: %d, Speed: %d\n", player1->pokemons[i].name, player1->pokemons[i].currentHP, player1->pokemons[i].speed);
+            }
+            printf("1->%s->> Choose one pokemon index: \n", player1->name);
+
+            scanf("%d", &newPokemonIndex);
+            int isValidInput = 1;
+            if (newPokemonIndex < 1 || newPokemonIndex > 6)
+            {
+                printf("you can enter indicies between 1 and 6 --->> try again :(\n");
+                isValidInput = 0;
+            }
+            if (isValidInput)
+            {
+                player1->currentIndex = --newPokemonIndex; // decrease index by one
+                printf("The current pokemon index for player %s is updated to %d\n", player1->name, player1->currentIndex);
+            }
+        } while (newPokemonIndex < 1 || newPokemonIndex > 6);
     }
     if (p2_action == 2) // handle switches first
     {
-        // player2 choose change pokemon option, show available pokemons
-        for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
-        {
-            if (player2->pokemons[i].currentHP <= 0)
-            {
-                continue;
-            }
-            printf("\n--- Pokemon #%d ---\n", i + 1);
-            printf("Name: %s, HP: %d \n", player2->pokemons[i].name, player2->pokemons[i].currentHP);
-        }
-        printf("2->%s->> Choose one pokemon index: \n", player2->name);
         int newPokemonIndex;
-        scanf("%d", &newPokemonIndex);
-        player2->currentIndex = --newPokemonIndex;
-        printf("The current pokemon index for player %s is updated to %d\n", player2->name, player2->currentIndex);
+        do
+        {
+            // player2 choose change pokemon option, show available pokemons
+            for (int i = 0; i < PLAYER_POKEMONS_COUNT; i++)
+            {
+                if (player2->pokemons[i].currentHP <= 0)
+                {
+                    continue;
+                }
+                printf("\n--- Pokemon #%d ---\n", i + 1);
+                printf("Name: %s, HP: %d, Speed: %d\n", player2->pokemons[i].name, player2->pokemons[i].currentHP, player1->pokemons[i].speed);
+            }
+            printf("2->%s->> Choose one pokemon index: \n", player2->name);
+
+            scanf("%d", &newPokemonIndex);
+            int isValidInput = 1;
+            if (newPokemonIndex > 6 || newPokemonIndex < 1)
+            {
+                printf("you can enter indicies between 1 and 6 --->> try again :(\n");
+                isValidInput = 0;
+            }
+            if (isValidInput)
+            {
+                // player2->currentIndex = --newPokemonIndex;
+                (*player2).currentIndex = --newPokemonIndex;
+                printf("The current pokemon index for player %s is updated to %d\n", player2->name, player2->currentIndex);
+            }
+        } while (newPokemonIndex > 6 || newPokemonIndex < 1);
     }
     if (p1_action == 1)
     {
-        // player1 choose attack, show moves of the current pokemon
-        printf("1->%s->> Select one of the moves of the current pokemon %s:\n", player1->name, player1->pokemons[player1->currentIndex].name);
-        for (int j = 0; j < 4; j++)
+        do
         {
-            printf("  %d. %-20s [%s] Power: %.0f\n",
-                   j + 1,
-                   player1->pokemons[player1->currentIndex].moves[j].name,
-                   player1->pokemons[player1->currentIndex].moves[j].type.name,
-                   player1->pokemons[player1->currentIndex].moves[j].power);
-        }
+            // player1 choose attack, show moves of the current pokemon
+            printf("1->%s->> Select one of the moves of the current pokemon %s:\n", player1->name, player1->pokemons[player1->currentIndex].name);
+            for (int j = 0; j < 4; j++)
+            {
+                printf("  %d. %-20s [%s] Power: %.0f\n",
+                       j + 1,
+                       player1->pokemons[player1->currentIndex].moves[j].name,
+                       player1->pokemons[player1->currentIndex].moves[j].type.name,
+                       player1->pokemons[player1->currentIndex].moves[j].power);
+            }
 
-        scanf("%d", &p1_selectedMoveIndex);
+            scanf("%d", &p1_selectedMoveIndex);
 
-        if (p1_selectedMoveIndex > 4 || p1_selectedMoveIndex < 1)
-        {
-            printf("invalid move selection for %d\n", p1_selectedMoveIndex);
-            // I should do something to skip the rest of the round or re ask for a correct input
-        }
+            if (p1_selectedMoveIndex > 4 || p1_selectedMoveIndex < 1)
+            {
+                printf("you can enter indicies between 1 and 4 --->> try again:(\n");
+            }
+        } while (p1_selectedMoveIndex > 4 || p1_selectedMoveIndex < 1);
         --p1_selectedMoveIndex;
     }
+
     if (p2_action == 1)
     {
-        // player2 choose attack, show moves of the current pokemon
-        printf("2->%s->> Select one of the moves of the current pokemon %s:\n", player2->name, player2->pokemons[player2->currentIndex].name);
-        for (int j = 0; j < 4; j++)
+        do
         {
-            printf("  %d. %-20s [%s] Power: %.0f\n",
-                   j + 1,
-                   player2->pokemons[player2->currentIndex].moves[j].name,
-                   player2->pokemons[player2->currentIndex].moves[j].type.name,
-                   player2->pokemons[player2->currentIndex].moves[j].power);
-        }
+            // player2 choose attack, show moves of the current pokemon
+            printf("2->%s->> Select one of the moves of the current pokemon %s:\n", player2->name, player2->pokemons[player2->currentIndex].name);
+            for (int j = 0; j < 4; j++)
+            {
+                printf("  %d. %-20s [%s] Power: %.0f\n",
+                       j + 1,
+                       player2->pokemons[player2->currentIndex].moves[j].name,
+                       player2->pokemons[player2->currentIndex].moves[j].type.name,
+                       player2->pokemons[player2->currentIndex].moves[j].power);
+            }
 
-        scanf("%d", &p2_selectedMoveIndex);
+            scanf("%d", &p2_selectedMoveIndex);
+            if (p2_selectedMoveIndex > 4 || p2_selectedMoveIndex < 1)
+            {
+                printf("you can enter indicies between 1 and 4 --->> try again :(\n");
+            }
+        } while (p2_selectedMoveIndex > 4 || p2_selectedMoveIndex < 1);
 
-        if (p2_selectedMoveIndex > 4 || p2_selectedMoveIndex < 1)
-        {
-            printf("invalid move selection for %d\n", p2_selectedMoveIndex);
-            // I should do something to skip the rest of the round or re ask for a correct input
-        }
         --p2_selectedMoveIndex;
     }
 
